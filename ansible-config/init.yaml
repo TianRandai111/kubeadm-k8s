@@ -1,0 +1,129 @@
+- hosts: all
+  tasks:
+    - name: "升级"
+      yum: 
+        name: "*"
+        state: latest
+
+    - name: "下载docker"
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/
+
+    - name: "安装vim tree lvm22"
+      yum:
+        name: 
+          - vim
+          - tree
+          - git
+          - docker-ce
+          - docker-ce-cli
+          - device-mapper-persistent-data
+          - yum-utils
+        state: latest
+
+    - name: "启动服务"
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: "下载镜像"
+      shell: docker pull {{ item }}
+      with_items:
+         - tianrandai/kube-apiserver:v1.14.2
+         - tianrandai/kube-controller-manager:v1.14.2
+         - tianrandai/kube-scheduler:v1.14.2 
+         - tianrandai/kube-proxy:v1.14.2  
+         - tianrandai/etcd:3.3.10 
+         - tianrandai/coredns:1.3.1
+         - tianrandai/pause:3.1
+
+    - name: "修改tag"
+      shell: docker tag {{ item.lod_name }} {{ item.new_name }}
+      with_items:
+        - { lod_name: "tianrandai/kube-apiserver:v1.14.2 ", new_name: "k8s.gcr.io/kube-apiserver:v1.14.2" }
+        - { lod_name: "tianrandai/kube-controller-manager:v1.14.2" , new_name: "k8s.gcr.io/kube-controller-manager:v1.14.2" }
+        - { lod_name: "tianrandai/kube-scheduler:v1.14.2"  , new_name: "k8s.gcr.io/kube-scheduler:v1.14.2" }
+        - { lod_name: "tianrandai/kube-proxy:v1.14.2" , new_name: "k8s.gcr.io/kube-proxy:v1.14.2" }
+        - { lod_name: "tianrandai/etcd:3.3.10"  , new_name: "k8s.gcr.io/etcd:3.3.10"  }
+        - { lod_name: "tianrandai/coredns:1.3.1" , new_name: "k8s.gcr.io/coredns:1.3.1" }
+        - { lod_name: "tianrandai/pause:3.1" , new_name: "k8s.gcr.io/pause:3.1" }
+
+    - name: "删除tag"
+      shell : docker rmi -f {{ item }}
+      with_items: 
+         - "tianrandai/kube-apiserver:v1.14.2"
+         - "tianrandai/kube-controller-manager:v1.14.2"
+         - "tianrandai/kube-scheduler:v1.14.2" 
+         - "tianrandai/kube-proxy:v1.14.2"
+         - "tianrandai/etcd:3.3.10"
+         - "tianrandai/coredns:1.3.1"
+         - "tianrandai/pause:3.1"
+
+    - name: "hosts"
+      shell: echo {{ item }} >> /etc/hosts
+      with_items:
+        - "10.39.52.4 kb-m1"
+        - "10.39.52.5 kb-m2"
+        - "10.39.52.6 kb-m3"
+        - "10.39.52.7 kb-n1"
+        - "10.39.52.8 kb-n2"
+
+    - name: "kubernetes"
+      shell: echo -e '[kubernetes]\nname=Kubernetes\nbaseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg' > /etc/yum.repos.d/kubernetes.repo
+
+    - name: "iptables"
+      shell: echo 1 > "/proc/sys/net/bridge/bridge-nf-call-iptables"
+
+- hosts: kube-master
+  tasks:
+    - name: "安装 kubectl,kubeadm,kubelet"
+      yum:
+        name: 
+          - kubectl
+          - kubeadm
+          - kubelet
+        state: latest
+
+- hosts: kube-node
+  tasks:
+    - name:
+      yum:
+        name:
+          - kubelet
+        state: latest
+
+- hosts: 10.39.52.4
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-m1
+
+- hosts: 10.39.52.5
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-m2
+
+- hosts: 10.39.52.6
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-m3
+
+- hosts: 10.39.52.7
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-n1
+
+- hosts: 10.39.52.8
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-n2
+
+    # - name: "重新上传证书"
+    #     #   shell: kubeadm init phase upload-certs --experimental-upload-certs
+
