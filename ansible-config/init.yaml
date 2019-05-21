@@ -10,7 +10,7 @@
         url: https://download.docker.com/linux/centos/docker-ce.repo
         dest: /etc/yum.repos.d/
 
-    - name: "安装vim tree lvm22"
+    - name: "安装vim tree lvm git docker-ce docker-ce-cli device-mapper-persistent-data yum-utils"
       yum:
         name: 
           - vim
@@ -125,5 +125,4 @@
         name: kb-n2
 
     # - name: "重新上传证书"
-    #     #   shell: kubeadm init phase upload-certs --experimental-upload-certs
-
+    #   shell: kubeadm init phase upload-certs --experimental-upload-certs
