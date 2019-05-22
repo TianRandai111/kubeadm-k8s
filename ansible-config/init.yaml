@@ -108,6 +108,12 @@
     - name: "关闭swap"
       shell: swapoff /dev/vdb
 
+    - name: "创建kubernetes目录"
+      file:
+        path: /etc/kubernetes
+        state: directory
+        mode: 0755
+
 - hosts: kube-master
   tasks:
     - name: "安装 kubectl,kubeadm,kubelet"
@@ -143,12 +149,6 @@
     - name: "执行脚本"
       script: ./new-etcd.sh
 
-    - name: "创建kubernetes目录"
-      file:
-        path: /etc/kubernetes
-        state: directory
-        mode: 0755
-
 - hosts: kube-master
   tasks:
     - name: "复制pki"
@@ -171,5 +171,5 @@
       shell:  /etc/kubernetes/kubeadm-config.yaml
 
     # - name: "重新上传证书"
-    #   shell: kubeadm init phase upload-certs --experimental-upload-certs
-
+    #     #   shell: kubeadm init phase upload-certs --experimental-upload-certs
+    #
