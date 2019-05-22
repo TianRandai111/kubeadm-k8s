@@ -160,10 +160,11 @@
         - 10.39.52.6
 
     - name: "赋权限给pki"
-      file: /etc/kubernetes/pki
-      state: directory
-      mode: 0777
-      recurse: yes
+      file:
+        path: /etc/kubernetes/pki
+        state: directory
+        mode: 0777
+        recurse: yes
 
     - name: "运行kubeadm-config.yaml"
       shell:  /etc/kubernetes/kubeadm-config.yaml
