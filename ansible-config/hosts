@@ -1,10 +1,10 @@
-# [kube-master]
-# 10.39.52.4
-# 10.39.52.5
-# 10.39.52.6
-# [kube-node]
-# 10.39.52.7
-# 10.39.52.8
-# [all:vars]
-# ansible_ssh_user="[用户]"
-# ansible_ssh_pass="[密码]"
+[kube-master]
+10.39.52.4
+10.39.52.5
+10.39.52.6
+[kube-node]
+10.39.52.7
+10.39.52.8
+[all:vars]
+ansible_ssh_user="root"
+ansible_ssh_pass="Fnw12345"

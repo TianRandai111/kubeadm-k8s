@@ -1,3 +1,33 @@
+- hosts: 10.39.52.4
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-m1
+
+- hosts: 10.39.52.5
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-m2
+
+- hosts: 10.39.52.6
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-m3
+
+- hosts: 10.39.52.7
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-n1
+
+- hosts: 10.39.52.8
+  tasks:
+    - name: "修改主机名"
+      hostname:
+        name: kb-n2
+
 - hosts: all
   tasks:
     - name: "升级"
@@ -10,19 +40,18 @@
         url: https://download.docker.com/linux/centos/docker-ce.repo
         dest: /etc/yum.repos.d/
 
-    - name: "安装vim tree lvm git docker-ce docker-ce-cli device-mapper-persistent-data yum-utils"
+    - name: "安装vim tree lvm docker-ce docker-ce-cli device-mapper-persistent-data yum-utils"
       yum:
         name: 
           - vim
           - tree
-          - git
           - docker-ce
           - docker-ce-cli
           - device-mapper-persistent-data
           - yum-utils
         state: latest
 
-    - name: "启动服务"
+    - name: "启动docker服务"
       service:
         name: docker
         state: started
@@ -76,6 +105,9 @@
     - name: "iptables"
       shell: echo 1 > "/proc/sys/net/bridge/bridge-nf-call-iptables"
 
+    - name: "关闭swap"
+      shell: swapoff /dev/vdb
+
 - hosts: kube-master
   tasks:
     - name: "安装 kubectl,kubeadm,kubelet"
@@ -86,6 +118,12 @@
           - kubelet
         state: latest
 
+    - name: "启动kubectl服务"
+      service:
+        name: kubelet
+        state: started
+        enabled: yes
+
 - hosts: kube-node
   tasks:
     - name:
@@ -94,35 +132,42 @@
           - kubelet
         state: latest
 
+    - name: "启动kubectl服务"
+      service:
+        name: kubelet
+        state: started
+        enabled: yes
+
 - hosts: 10.39.52.4
   tasks:
-    - name: "修改主机名"
-      hostname:
-        name: kb-m1
+    - name:
+      file: ./new-etcd.sh
+      mode: 0777
 
-- hosts: 10.39.52.5
-  tasks:
-    - name: "修改主机名"
-      hostname:
-        name: kb-m2
+    - name: "执行脚本"
+      script: ./new-etcd.sh
 
-- hosts: 10.39.52.6
-  tasks:
-    - name: "修改主机名"
-      hostname:
-        name: kb-m3
+    - name: "创建kubernetes目录"
+      file: /etc/kubernetes
+      state: directory
+      mode: 0755
 
-- hosts: 10.39.52.7
-  tasks:
-    - name: "修改主机名"
-      hostname:
-        name: kb-n1
+    - name: "复制pki"
+      copy: 
+        src: /tmp/{{ item }}/.
+        desc: /etc/kubernetes/
+      with_items:
+        - 10.39.52.4
+        - 10.39.52.5
+        - 10.39.52.6
 
-- hosts: 10.39.52.8
-  tasks:
-    - name: "修改主机名"
-      hostname:
-        name: kb-n2
+    - name: "赋权限给pki"
+      file: /etc/kubernetes/pki
+      state: directory
+      mode: 0777
+      recurse: yes
+
 
     # - name: "重新上传证书"
     #   shell: kubeadm init phase upload-certs --experimental-upload-certs
+
