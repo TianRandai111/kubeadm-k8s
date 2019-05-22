@@ -148,6 +148,7 @@
       state: directory
       mode: 0755
 
+- hosts: kube-master
     - name: "复制pki"
       copy: 
         src: /tmp/{{ item }}/.
@@ -168,3 +169,4 @@
 
     # - name: "重新上传证书"
     #   shell: kubeadm init phase upload-certs --experimental-upload-certs
+
