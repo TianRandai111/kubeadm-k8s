@@ -149,6 +149,7 @@
       mode: 0755
 
 - hosts: kube-master
+  tasks:
     - name: "复制pki"
       copy: 
         src: /tmp/{{ item }}/.
