@@ -167,7 +167,8 @@
       mode: 0777
       recurse: yes
 
+    - name: "运行kubeadm-config.yaml"
+      script: /etc/kubernetes/kubeadm-config.yaml
 
     # - name: "重新上传证书"
-    #   shell: kubeadm init phase upload-certs --experimental-upload-certs
-
+    #     #   shell: kubeadm init phase upload-certs --experimental-upload-certs
