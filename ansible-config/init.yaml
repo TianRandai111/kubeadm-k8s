@@ -144,9 +144,10 @@
       script: ./new-etcd.sh
 
     - name: "创建kubernetes目录"
-      file: /etc/kubernetes
-      state: directory
-      mode: 0755
+      file:
+        path: /etc/kubernetes
+        state: directory
+        mode: 0755
 
 - hosts: kube-master
   tasks:
